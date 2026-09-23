@@ -18,6 +18,22 @@ class BookingServiceTests(unittest.TestCase):
         second = self.service.create_booking("B", 600, 660, "Mali")
         self.assertEqual(self.service.list_bookings(), (first, second))
 
+    def test_same_room_adjacent_bookings_are_allowed(self) -> None:
+        first = self.service.create_booking("A", 540, 600, "Narin")
+        second = self.service.create_booking("A", 600, 660, "Mali")
+        self.assertEqual(self.service.list_bookings(), (first, second))
+
+    def test_rejects_same_room_overlap_without_storing(self) -> None:
+        first = self.service.create_booking("A", 540, 600, "Narin")
+        with self.assertRaises(ValueError):
+            self.service.create_booking("A", 570, 630, "Mali")
+        self.assertEqual(self.service.list_bookings(), (first,))
+
+    def test_allows_overlap_in_different_rooms(self) -> None:
+        first = self.service.create_booking("A", 540, 600, "Narin")
+        second = self.service.create_booking("B", 570, 630, "Mali")
+        self.assertEqual(self.service.list_bookings(), (first, second))
+
     def test_rejects_blank_room_or_guest(self) -> None:
         with self.assertRaises(ValueError):
             self.service.create_booking("  ", 540, 600, "Narin")
